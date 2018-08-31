@@ -1,6 +1,7 @@
 FROM alpine as build
 ARG UB_VERSION
 ENV UB_VERSION ${UB_VERSION:-1.7.3}
+
 ENV WORKDIR /root
 
 WORKDIR ${WORKDIR}
@@ -67,8 +68,11 @@ RUN \
     chmod 644 /usr/local/lib/libunbound.a && \
     find /usr/local/lib -iname "libunbound.so.?.*" -exec ln -s -f {} /usr/local/lib/libunbound.so.2 \; && \
     find /usr/local/lib -iname "libunbound.so.?.*" -exec ln -s -f {} /usr/local/lib/libunbound.so \; && \
-    addgroup -g 999 unbound && \
-    adduser -u 999 -g "" -G unbound -s /sbin/nologin -DH unbound
+    addgroup -g 9999 unbound && \
+    adduser -u 9999 -g "" -G unbound -s /sbin/nologin -DH unbound && \
+    mkdir -p /var/run/unbound && \
+    chmod -R 770 /var/run/unbound && \
+    chown -R 9999:9999 /var/run/unbound
 
 LABEL maintainer="docker@scurr.me"
 LABEL version=${UB_VERSION}
