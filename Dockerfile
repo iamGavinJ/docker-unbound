@@ -1,8 +1,9 @@
 FROM alpine as build
 ARG UB_VERSION
-ENV UB_VERSION ${UB_VERSION:-1.8.0}
+ENV UB_VERSION ${UB_VERSION:-1.8.3}
 
 ENV WORKDIR /root
+ENV DESTDIR ${WORKDIR}/install
 
 WORKDIR ${WORKDIR}
 ADD ["https://github.com/NLnetLabs/unbound/archive/release-${UB_VERSION}.tar.gz", "${WORKDIR}/unbound.tar.gz"]
@@ -34,30 +35,14 @@ RUN \
         --with-pidfile=/var/run/unbound/unbound.pid && \
     cd ${WORKDIR} && \
     echo "**** make install ****" && \
+    mkdir -p ${DESTDIR} && \
     make -C ./unbound-release-${UB_VERSION} install
 
 FROM alpine
 
 COPY --from=build [ \
-    "/usr/local/include/unbound.h", \
-    "/usr/local/lib/libunbound.so.?.*", \
-    "/usr/local/lib/libunbound.la", \
-    "/usr/local/lib/libunbound.a", \
-        "/usr/local/lib/" \
-    ]
-
-COPY --from=build [ \
-    "/usr/local/sbin/unbound", \
-    "/usr/local/sbin/unbound-checkconf", \
-    "/usr/local/sbin/unbound-control", \
-    "/usr/local/sbin/unbound-host", \
-    "/usr/local/sbin/unbound-anchor", \
-        "/usr/local/sbin/" \
-    ]
-
-COPY --from=build [ \
-    "/usr/local/etc/unbound/unbound.conf", \
-        "/usr/local/etc/unbound/unbound.conf" \
+    "${DESTDIR}/", \
+        "/" \
     ]
 
 RUN \
@@ -65,9 +50,6 @@ RUN \
     apk upgrade && \
     apk add --update \
         libevent && \
-    chmod 644 /usr/local/lib/libunbound.a && \
-    find /usr/local/lib -iname "libunbound.so.?.*" -exec ln -s -f {} /usr/local/lib/libunbound.so.2 \; && \
-    find /usr/local/lib -iname "libunbound.so.?.*" -exec ln -s -f {} /usr/local/lib/libunbound.so \; && \
     addgroup -g 9999 unbound && \
     adduser -u 9999 -g "" -G unbound -s /sbin/nologin -DH unbound && \
     mkdir -p /var/run/unbound && \
@@ -77,8 +59,7 @@ RUN \
 LABEL maintainer="docker@scurr.me"
 LABEL version=${UB_VERSION}
 
-EXPOSE 53/tcp
-EXPOSE 53/udp
+EXPOSE 53/tcp 53/udp
 VOLUME [ "/usr/local/etc/unbound", "/var/log/unbound" ]
 ENTRYPOINT ["/usr/local/sbin/unbound", "-vd"]
 #CMD ["unbound.conf"]
