@@ -1,0 +1,15 @@
+version: '2'
+
+services:
+  unbound:
+    image: iamgavinj/unbound
+    container_name: unbound
+    networks:
+      - bridge
+    restart: always
+    volumes:
+      - /docker/unbound/etc:/usr/local/etc/unbound
+      - /docker/unbound/log:/var/log/unbound
+    ports:
+      - "53:53"
+      - "53/udp:53/udp"
