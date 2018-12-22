@@ -3,10 +3,12 @@ ARG UB_VERSION
 ENV UB_VERSION ${UB_VERSION:-1.8.3}
 
 ENV WORKDIR /root
+ENV BUILDDIR ${WORKDIR}/build
 ENV DESTDIR ${WORKDIR}/install
+ENV PIDDIR "/var/run/unbound"
 
 WORKDIR ${WORKDIR}
-ADD ["https://github.com/NLnetLabs/unbound/archive/release-${UB_VERSION}.tar.gz", "${WORKDIR}/unbound.tar.gz"]
+ADD ["https://github.com/NLnetLabs/unbound/archive/release-${UB_VERSION}.tar.gz", "${WORKDIR}/source.tar.gz"]
 RUN \
     echo $UB_VERSION && \
     echo "**** install packages ****" && \
@@ -20,11 +22,15 @@ RUN \
         expat \
         expat-dev \
         libevent \
-        libevent-dev && \
+        libevent-dev
+RUN \ 
     echo "**** extract source ****" && \
-    tar -xf ./unbound.tar.gz && \
+    mkdir -p "${BUILDDIR}" && \
+    tar -vx --strip-components=1 -f "${WORKDIR}/source.tar.gz" -C "${BUILDDIR}"
+
+RUN \ 
     echo "**** configure source ****" && \
-    cd ${WORKDIR}/unbound-release-${UB_VERSION} && \
+    cd "${BUILDDIR}" && \
     ./configure \
         --enable-pie \
         --without-pythonmodule \
@@ -32,36 +38,49 @@ RUN \
         --with-libevent \
         --disable-flto \
         --enable-static-exe \
-        --with-pidfile=/var/run/unbound/unbound.pid && \
-    cd ${WORKDIR} && \
-    echo "**** make install ****" && \
-    mkdir -p ${DESTDIR} && \
-    make -C ./unbound-release-${UB_VERSION} install
-
-FROM alpine
-
-COPY --from=build [ \
-    "${DESTDIR}/", \
-        "/" \
-    ]
+        --with-pidfile="${PIDDIR}/unbound.pid" && \
+    cd "${WORKDIR}"
 
 RUN \
+    echo "**** make install ****" && \
+    mkdir -p "${DESTDIR}" && \
+    make -C "${BUILDDIR}" install 
+
+RUN \
+    echo "*** tar ***" && \
+    tar -vczf "${WORKDIR}/install.tar.gz" -C "${DESTDIR}" .
+
+FROM alpine
+ENV WORKDIR /root
+ENV PIDDIR "/var/run/unbound"
+WORKDIR ${WORKDIR}
+COPY --from=build [ "${WORKDIR}/install.tar.gz", "${WORKDIR}/" ]
+COPY [ "docker-entrypoint.sh", "/usr/local/bin/" ]
+CMD ["postgres"]
+RUN \
+    echo "***********************" && \
+    tar -vxf "${WORKDIR}/install.tar.gz" -C "/" && \
+    ln -s "/usr/local/bin/docker-entrypoint.sh" "/" && \
+    chmod 555 "/usr/local/bin/docker-entrypoint.sh" && \
+    chmod 555 "/docker-entrypoint.sh" && \
     apk update && \
     apk upgrade && \
     apk add --update \
         libevent && \
     addgroup -g 9999 unbound && \
     adduser -u 9999 -g "" -G unbound -s /sbin/nologin -DH unbound && \
-    mkdir -p /var/run/unbound && \
-    chmod -R 770 /var/run/unbound && \
-    chown -R 9999:9999 /var/run/unbound
+    mkdir -p "${PIDDIR}" && \
+    chmod -R 775 "${PIDDIR}" && \
+    chown -R 9999:9999 "${PIDDIR}"
 
 LABEL maintainer="docker@scurr.me"
 LABEL version=${UB_VERSION}
 
 EXPOSE 53/tcp 53/udp
 VOLUME [ "/usr/local/etc/unbound", "/var/log/unbound" ]
-ENTRYPOINT ["/usr/local/sbin/unbound", "-vd"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
+#ENTRYPOINT ["/usr/local/sbin/unbound", "-vd"]
+CMD ["/usr/local/sbin/unbound", "-vd"]
 #CMD ["unbound.conf"]
 HEALTHCHECK --interval=3s --retries=3 --start-period=3s --timeout=3s \
-    CMD cat /var/run/unbound/unbound.pid | grep -q '^[0-9]\{1,\}$' 
+    CMD grep -q '^[0-9]\{1,\}$' "${PIDDIR}/unbound.pid"
