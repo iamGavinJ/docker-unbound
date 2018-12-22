@@ -60,6 +60,7 @@ CMD ["postgres"]
 RUN \
     echo "***********************" && \
     tar -vxf "${WORKDIR}/install.tar.gz" -C "/" && \
+    rm -f "${WORKDIR}/install.tar.gz" && \
     ln -s "/usr/local/bin/docker-entrypoint.sh" "/" && \
     chmod 555 "/usr/local/bin/docker-entrypoint.sh" && \
     chmod 555 "/docker-entrypoint.sh" && \
