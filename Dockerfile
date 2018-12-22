@@ -84,5 +84,4 @@ ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["/usr/local/sbin/unbound", "-vd"]
 #CMD ["unbound.conf"]
 HEALTHCHECK --interval=3s --retries=3 --start-period=3s --timeout=3s \
-    CMD ps -q $(cat "${PIDDIR}/unbound.pid" 2>/dev/null || echo 1) -o comm= | grep -sqi unbound && \
-        (host 1.1.1.1 localhost > /dev/null || return 1) || return 1
+    CMD grep "Name:" /proc/$(cat /var/run/unbound/unbound.pid 2>/dev/null || echo 0)/status 2>/dev/null | grep -sqi unbound && (host 1.1.1.1 localhost > /dev/null || return 1) || return 1
