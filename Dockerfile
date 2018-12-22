@@ -8,7 +8,8 @@ ENV DESTDIR ${WORKDIR}/install
 ENV PIDDIR "/var/run/unbound"
 
 WORKDIR ${WORKDIR}
-ADD ["https://github.com/NLnetLabs/unbound/archive/release-${UB_VERSION}.tar.gz", "${WORKDIR}/source.tar.gz"]
+ADD ["https://nlnetlabs.nl/downloads/unbound/unbound-${UB_VERSION}.tar.gz", "${WORKDIR}/source.tar.gz"]
+#ADD ["https://github.com/NLnetLabs/unbound/archive/release-${UB_VERSION}.tar.gz", "${WORKDIR}/source.tar.gz"]
 RUN \
     echo $UB_VERSION && \
     echo "**** install packages ****" && \
