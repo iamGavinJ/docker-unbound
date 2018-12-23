@@ -11,7 +11,7 @@ services:
     volumes:
       - /docker/unbound/etc:/usr/local/etc/unbound
       - /docker/unbound/log:/var/log/unbound
-      - /docker/unbound/run:/var/run/unbound
+      - /docker/unbound/run/unbound.sock:/var/run/unbound/unbound.sock
     ports:
       - "53:53"
       - "53:53/udp"
