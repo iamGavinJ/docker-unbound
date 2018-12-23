@@ -1,4 +1,5 @@
 version: '3.7'
+### Minimum v3.7 required for 'init: true'
 
 services:
   unbound:
