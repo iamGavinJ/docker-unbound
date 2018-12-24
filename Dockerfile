@@ -78,6 +78,8 @@ RUN \
     chmod 555 "/docker-entrypoint.sh" && \
     apk update && \
     apk upgrade && \
+    apk add --update \
+        python3 && \
     addgroup -g 9999 unbound && \
     adduser -u 9999 -g "" -G unbound -s /sbin/nologin -DH unbound && \
     mkdir -p "${RUNDIR}" && \
