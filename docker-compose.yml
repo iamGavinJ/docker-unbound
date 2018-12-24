@@ -3,7 +3,7 @@ version: '3.7'
 
 services:
   unbound:
-    image: iamgavinj/unbound:latest
+    image: iamgavinj/unbound-pymod:latest
     container_name: unbound
     init: true
     network_mode: bridge
