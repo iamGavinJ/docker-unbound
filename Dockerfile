@@ -22,7 +22,7 @@ RUN \
         --disable-silent-rules \
         --disable-samples && \
     mkdir -p "${DESTDIR}" && \
-    ./make -C "${BUILDDIR}" install && \
+    make -C "${BUILDDIR}" install && \
     apk del python2
 
 ADD ["https://nlnetlabs.nl/downloads/unbound/unbound-${UB_VERSION}.tar.gz", "${WORKDIR}/unbound.tar.gz"]
