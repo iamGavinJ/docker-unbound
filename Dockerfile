@@ -9,6 +9,10 @@ WORKDIR ${WORKDIR}
 ADD ["https://github.com/libevent/libevent/releases/download/release-${LIBEVENT_VERSION}-stable/libevent-${LIBEVENT_VERSION}-stable.tar.gz", "${WORKDIR}/libevent.tar.gz" ]
 RUN \
     echo "**** Building libevent ****" && \
+    mkdir -p "${DESTDIR}/usr" && \
+    cp -a "/usr/local" "${DESTDIR}/usr" && \
+    mv "/usr/local" "/usr/local.orig" && \
+    ln -vs "${DESTDIR}/usr/local" "/usr" && \
     apk update && \
     apk upgrade && \
     apk add --update \
@@ -22,7 +26,6 @@ RUN \
     ./configure \
         --disable-silent-rules \
         --disable-samples && \
-    mkdir -p "${DESTDIR}" && \
     make -C "${BUILDDIR}" install && \
     apk del python2
 
