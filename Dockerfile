@@ -35,7 +35,8 @@ RUN \
         alpine-sdk \
         libressl-dev \
         python3-dev \
-        expat-dev && \
+        expat-dev \
+        swig && \
     export BUILDDIR="${WORKDIR}/unbound" && \
     mkdir -p "${BUILDDIR}" && \
     tar -vx --strip-components=1 -f "${WORKDIR}/unbound.tar.gz" -C "${BUILDDIR}" && \
