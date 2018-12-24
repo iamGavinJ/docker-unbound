@@ -3,7 +3,8 @@ FROM alpine as build
 ARG UB_VERSION
 ENV UB_VERSION="${UB_VERSION:-1.8.3}" LIBEVENT_VERSION="${LIBEVENT_VERSION:-2.1.8}" PYTHON_VERSION="3"
 
-ENV WORKDIR="/root" DESTDIR="${WORKDIR}/install" RUNDIR="/var/run/unbound"
+ENV WORKDIR="/root" 
+ENV DESTDIR="${WORKDIR}/install" RUNDIR="/var/run/unbound"
 WORKDIR ${WORKDIR}
 ADD ["https://github.com/libevent/libevent/releases/download/release-${LIBEVENT_VERSION}-stable/libevent-${LIBEVENT_VERSION}-stable.tar.gz", "${WORKDIR}/libevent.tar.gz" ]
 RUN \
@@ -33,6 +34,7 @@ RUN \
         curl \
         alpine-sdk \
         libressl-dev \
+        python3-dev \
         expat-dev && \
     export BUILDDIR="${WORKDIR}/unbound" && \
     mkdir -p "${BUILDDIR}" && \
