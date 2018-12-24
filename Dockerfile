@@ -26,6 +26,7 @@ RUN \
     apk del python2
 
 ADD ["https://nlnetlabs.nl/downloads/unbound/unbound-${UB_VERSION}.tar.gz", "${WORKDIR}/unbound.tar.gz"]
+ENV BUILDDIR="${WORKDIR}/unbound"
 RUN \
     echo "**** Building unbound ****" && \
     apk add --update \
