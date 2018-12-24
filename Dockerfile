@@ -71,15 +71,15 @@ COPY --from=build [ "${WORKDIR}/install.tar.gz", "${WORKDIR}/" ]
 COPY [ "docker-entrypoint.sh", "/usr/local/bin/" ]
 RUN \
     echo "***********************" && \
+    apk update && \
+    apk upgrade && \
+    apk add --update \
+        python3 && \
     tar -vxf "${WORKDIR}/install.tar.gz" -C "/" && \
     rm -f "${WORKDIR}/install.tar.gz" && \
     ln -s "/usr/local/bin/docker-entrypoint.sh" "/" && \
     chmod 555 "/usr/local/bin/docker-entrypoint.sh" && \
     chmod 555 "/docker-entrypoint.sh" && \
-    apk update && \
-    apk upgrade && \
-    apk add --update \
-        python3 && \
     addgroup -g 9999 unbound && \
     adduser -u 9999 -g "" -G unbound -s /sbin/nologin -DH unbound && \
     mkdir -p "${RUNDIR}" && \
