@@ -57,7 +57,7 @@ ENV PIDDIR "/var/run/unbound"
 WORKDIR ${WORKDIR}
 COPY --from=build [ "${WORKDIR}/install.tar.gz", "${WORKDIR}/" ]
 COPY [ "docker-entrypoint.sh", "/usr/local/bin/" ]
-CMD ["postgres"]
+#CMD ["postgres"]
 RUN \
     echo "***********************" && \
     tar -vxf "${WORKDIR}/install.tar.gz" -C "/" && \
