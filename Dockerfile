@@ -68,7 +68,8 @@ RUN \
     apk update && \
     apk upgrade && \
     apk add --update \
-        libevent && \
+        libevent \
+        libressl && \
     addgroup -g 9999 unbound && \
     adduser -u 9999 -g "" -G unbound -s /sbin/nologin -DH unbound && \
     mkdir -p "${PIDDIR}" && \
